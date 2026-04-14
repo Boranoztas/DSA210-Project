@@ -65,7 +65,7 @@ Do building age and distance to rail systems have a statistically significant ef
 ## Exploratory Data Analysis
 
 ### Price Overview and District Distribution
-![EDA Overview](figures/eda_overview.png)
+![EDA Overview](figures/eda_overview-2.png)
 *Left: Price distribution after removing top 2% outliers. Median price is ~3M TL. Right: Median price by district — Beşiktaş and Sarıyer lead on the European side, while Kadıköy leads on the Anatolian side.*
 
 ### Building Age and Rail Distance Distributions
