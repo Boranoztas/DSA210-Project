@@ -41,7 +41,7 @@ To enrich the dataset, Istanbul metro, metrobus, tram, and Marmaray station coor
 ## Research Questions
 
 ### Main Question
-Do building age and distance to rail systems have a statistically significant effect on residential housing prices in Istanbul?
+Do building age and distance to rail systems have a statistically significant effect on residential housing prices in Istanbul, and which factor has greater predictive power?
 
 ### Sub-Questions
 1. Do housing prices differ significantly across building age groups?
@@ -102,31 +102,104 @@ Do building age and distance to rail systems have a statistically significant ef
 
 ---
 
+## Machine Learning
+
+Three regression models were trained to predict housing prices and quantify the relative importance of each feature — directly answering the main research question: **which factor matters more, building age or rail proximity?**
+
+### Models Trained
+
+| Model | Role |
+|-------|------|
+| Linear Regression | Baseline — simple linear model |
+| Random Forest | Ensemble — robust to overfitting |
+| Gradient Boosting | Best performer — sequential boosting |
+
+### Features Used
+
+| Feature | Type | Description |
+|---------|------|-------------|
+| `rayli_mesafe_km` | 🔴 Key variable | Distance to nearest rail station (km) |
+| `Bina_Yasi_Sayi` | 🔴 Key variable | Building age (numeric, 0–25) |
+| `Brüt_Metrekare` | 🔵 Control | Gross square meters |
+| `Net_Metrekare` | 🔵 Control | Net square meters |
+| `Yaşam_endeksi` | 🔵 Control | Neighborhood living quality index |
+| `Nüfus` | 🔵 Control | District population |
+| `ilce_enc` | 🔵 Control | District (label encoded) |
+| `yaka_enc` | 🔵 Control | City side — European/Anatolian (encoded) |
+| `Oda_Sayi_Num` | 🔵 Control | Number of rooms (numeric) |
+
+Control variables are included to isolate the effect of the key variables. Without them, observed price differences could be driven by confounding factors (e.g., larger apartments near metro stations).
+
+### Model Performance
+
+![ML Model Comparison](figures/ml_model_comparison.png)
+*Left: R² scores — Gradient Boosting (0.566) outperforms Random Forest (0.557) and Linear Regression (0.339). Middle: RMSE in million TL. Right: 5-fold cross-validation R² with standard deviation — note high variance in Linear Regression, indicating instability.*
+
+| Model | R² (Test) | RMSE | MAE | CV R² (5-fold) |
+|-------|-----------|------|-----|----------------|
+| Linear Regression | 0.339 | 2.86M TL | — | 0.138 ± 0.56 |
+| Random Forest | 0.557 | 2.34M TL | — | 0.304 ± 0.24 |
+| **Gradient Boosting** | **0.566** | **2.31M TL** | **1.24M TL** | **0.263 ± 0.25** |
+
+**Best model: Gradient Boosting** with R²=0.567, explaining 56.7% of price variance.
+
+### Actual vs Predicted Prices
+
+![Actual vs Predicted](figures/ml_actual_vs_predicted.png)
+*Left: Predicted vs actual prices for the best model (Gradient Boosting). The model performs well for mid-range properties (1–6M TL) but tends to underestimate high-end listings. Right: Residual plot — residuals are concentrated around zero for lower prices but fan out for higher predicted values, indicating heteroscedasticity typical of real estate data.*
+
+### Feature Importance — Answering the Main Question
+
+![Feature Importance](figures/ml_feature_importance.png)
+*Both Random Forest and Gradient Boosting consistently rank Rail Distance above Building Age. Red bars = key project variables.*
+
+| Feature | Random Forest | Gradient Boosting |
+|---------|:---:|:---:|
+| Gross m² | 32.2% | 37.6% |
+| Living Index | 31.9% | 40.9% |
+| **Rail Distance (km)** | **12.5%** | **8.1%** |
+| Net m² | 8.6% | 3.6% |
+| **Building Age** | **7.4%** | **5.2%** |
+| Room Count | 3.3% | 1.1% |
+| Population | 2.7% | 2.2% |
+| District | 1.0% | 1.2% |
+| City Side | 0.3% | 0.0% |
+
+**Answer to the main research question:** Rail proximity (~12.5%) is a stronger predictor of housing price than building age (~7.4%), consistently across both models. Rail distance carries approximately **1.7× more predictive weight** than building age.
+
+---
+
 ## Key Findings
 
-1. **Rail proximity has a strong and significant effect on housing prices.** Both the ANOVA across distance bands (p≈0.000) and the t-test comparing near vs far listings (p≈0.000) confirm that listings closer to rail stations command significantly higher prices.
+1. **Rail proximity has a strong and significant effect on housing prices.** Both the ANOVA across distance bands (p≈0.000) and the t-test (p≈0.000) confirm that listings closer to rail stations command significantly higher prices.
 
-2. **Building age has a statistically significant but modest effect.** The ANOVA (F=2.123, p=0.031) confirms real price differences across building age groups, but the correlation with price is weak (r=0.024). Newer buildings tend to be pricier, but the relationship is not perfectly linear.
+2. **Building age has a statistically significant but modest effect.** The ANOVA (F=2.123, p=0.031) confirms real price differences across building age groups, but the effect size is smaller than rail proximity (r=0.024 vs r=-0.159).
 
-3. **No significant European/Anatolian price difference after outlier removal.** Once extreme-priced listings are excluded, the two sides show statistically similar price distributions (p=0.228).
+3. **Rail distance is a stronger predictor than building age**, confirmed by feature importance from both ML models (~12.5% vs ~7.4%).
 
-4. **Rail distance is a stronger predictor than building age.** Correlation with price: rail distance r=-0.159 vs building age r=0.024.
+4. **Gross square meters and living quality index are the dominant price drivers** at ~32% each, consistent with general housing market literature.
+
+5. **Gradient Boosting is the best model** with R²=0.567 and RMSE=2.31M TL, explaining 56.7% of price variance.
+
+6. **No significant European/Anatolian price difference** after outlier removal (p=0.228).
 
 ---
 
 ## Limitations and Future Work
 
 ### Limitations
-- **Neighborhood-level geocoding:** Coordinates represent neighborhood centroids, not individual listing locations.
-- **One neighborhood not geocoded:** Sahrayıcedit could not be resolved by Nominatim.
+- **Neighborhood-level geocoding:** Coordinates represent neighborhood centroids, not individual listing locations — listings in the same neighborhood share identical rail distances.
+- **One neighborhood not geocoded:** Sahrayıcedit could not be resolved by Nominatim (7 listings affected).
 - **Cross-sectional data:** Dataset covers 2021–2022 only; temporal price dynamics cannot be analyzed.
-- **Dataset coverage:** Only 13 of Istanbul's 39 districts are represented.
+- **Dataset coverage:** Only 13 of Istanbul's 39 districts are represented, with heavy concentration in central/premium areas.
+- **High CV variance** in cross-validation scores indicates model sensitivity to train/test split — a larger and more geographically diverse dataset would improve stability.
 
 ### Future Work
 - Obtain listing-level coordinates for precise distance calculation
-- Extend dataset to cover all 39 districts
-- Add ML models (Random Forest, XGBoost) for price prediction and feature importance
-- Add additional enrichment variables: school proximity, earthquake risk scores
+- Extend dataset to cover all 39 Istanbul districts
+- Add additional enrichment: school proximity, earthquake risk scores, green space coverage
+- Try XGBoost, LightGBM, and neural network models
+- Incorporate temporal data to study price trends over time
 
 ---
 
@@ -135,34 +208,32 @@ Do building age and distance to rail systems have a statistically significant ef
 ```
 DSA210-Istanbul-Housing/
 ├── data/
-│   ├── Real_Estate_in_ISTANBUL__Emlakjet_.csv     # Original dataset
+│   ├── Real Estate in ISTANBUL (Emlakjet).csv     # Original dataset
 │   └── istanbul_housing_enriched.csv              # Enriched dataset (34 columns)
 ├── figures/
-│   ├── eda_overview.png
+│   ├── eda_overview-2.png
 │   ├── eda_distributions.png
 │   ├── h1_building_age.png
 │   ├── h2_rail_distance.png
 │   ├── h3_side_comparison.png
-│   └── hypothesis_summary.png
+│   ├── hypothesis_summary.png
+│   ├── ml_model_comparison.png
+│   ├── ml_actual_vs_predicted.png
+│   └── ml_feature_importance.png
 ├── notebooks/
 │   └── notebookbfb756d75f.ipynb                   # Kaggle notebook
 └── README.md
 ```
 
+> **Note:** The notebook is designed to run on Kaggle due to the geocoding step requiring internet access and the Nominatim API. The enriched dataset (`istanbul_housing_enriched.csv`) is included in the `data/` folder and can be used directly for EDA, hypothesis testing, and ML without re-running the geocoding step.
+
 ---
 
 ## Notebook
 
-The analysis was conducted in a Kaggle notebook:
+The full analysis — data loading, cleaning, enrichment, EDA, hypothesis testing, and machine learning — was conducted in a single Kaggle notebook:
 
-🔗 **[DSA210 Milestone 1 – Kaggle Notebook](notebookbfb756d75f.ipynb)**
-
-The notebook covers:
-- Data loading and cleaning
-- Neighborhood geocoding using Nominatim API
-- Rail distance computation using the Haversine formula
-- Exploratory data analysis (EDA)
-- Hypothesis testing (ANOVA, t-test)
+🔗 **[DSA210 Analysis Notebook – Kaggle](notebookbfb756d75f.ipynb)**
 
 ---
 
@@ -172,6 +243,7 @@ AI tools (Claude) were used for:
 - Data cleaning and enrichment pipeline development
 - Geocoding and Haversine distance computation code
 - Statistical test selection and implementation
+- ML model training and feature importance analysis
 - Visualization code and README structure
 
 All research question formulation, hypothesis design, data source selection, methodology decisions, and interpretation of results were performed independently.
