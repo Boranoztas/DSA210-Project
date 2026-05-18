@@ -206,23 +206,26 @@ Control variables are included to isolate the effect of the key variables. Witho
 ## Project Structure
 
 ```
-DSA210-Istanbul-Housing/
+dsa210-milestone1/
+├── README.md                                      # Project documentation
+├── requirements.txt                               # Python dependencies
 ├── data/
 │   ├── Real Estate in ISTANBUL (Emlakjet).csv     # Original dataset
 │   └── istanbul_housing_enriched.csv              # Enriched dataset (34 columns)
-├── figures/
-│   ├── eda_overview-2.png
-│   ├── eda_distributions.png
-│   ├── h1_building_age.png
-│   ├── h2_rail_distance.png
-│   ├── h3_side_comparison.png
-│   ├── hypothesis_summary.png
-│   ├── ml_model_comparison.png
-│   ├── ml_actual_vs_predicted.png
-│   └── ml_feature_importance.png
 ├── notebooks/
-│   └── notebookbfb756d75f.ipynb                   # Kaggle notebook
-└── README.md
+│   └── notebookbfb756d75f.ipynb                   # Kaggle notebook (EDA + ML)
+├── figures/
+│   ├── eda_overview-2.png                         # Price distribution & district overview
+│   ├── eda_distributions.png                      # Building age & rail distance distributions
+│   ├── h1_building_age.png                        # H1: ANOVA building age
+│   ├── h2_rail_distance.png                       # H2: ANOVA & t-test rail distance
+│   ├── h3_side_comparison.png                     # H3: European vs Anatolian side
+│   ├── hypothesis_summary.png                     # Hypothesis testing summary table
+│   ├── ml_model_comparison.png                    # ML model performance comparison
+│   ├── ml_actual_vs_predicted.png                 # Actual vs predicted prices
+│   └── ml_feature_importance.png                  # Feature importance scores
+└── final report/
+    └── DSA210_Final_Report.pdf                    # Final report PDF
 ```
 
 > **Note:** The notebook is designed to run on Kaggle due to the geocoding step requiring internet access and the Nominatim API. The enriched dataset (`istanbul_housing_enriched.csv`) is included in the `data/` folder and can be used directly for EDA, hypothesis testing, and ML without re-running the geocoding step.
@@ -233,7 +236,15 @@ DSA210-Istanbul-Housing/
 
 The full analysis — data loading, cleaning, enrichment, EDA, hypothesis testing, and machine learning — was conducted in a single Kaggle notebook:
 
-🔗 **[DSA210 Analysis Notebook – Kaggle](notebookbfb756d75f.ipynb)**
+🔗 **[DSA210 Analysis Notebook – Kaggle](https://www.kaggle.com/code/boranzta/notebookbfb756d75f)**
+
+---
+
+## AI Conversation Log
+
+The full conversation with Claude (including all prompts, code generation, and iterative development) is documented here:
+
+🔗 **[Claude Conversation Log](https://claude.ai/share/45b6082e-74ee-4cd7-b110-73564dbce2c2)**
 
 ---
 
